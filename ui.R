@@ -2,11 +2,18 @@
 #
 #load("dat.R")
 #dat<-simMGCFA
-library(shiny)
-library(markdown)
+
+requireNamespace("shiny", quietly = F)
+requireNamespace("shinyjs", quietly = F)
+requireNamespace("markdown", quietly = F)
+requireNamespace("shinyWidgets", quietly = F)
+requireNamespace("MIE", quietly = F)
+
+
 # Define UI for application that draws a histogram
 shinyUI(
   fluidPage(
+    shinyjs::useShinyjs(),
     tags$head(tags$style(
       HTML('
            #sidebar {
@@ -90,22 +97,12 @@ shinyUI(
        conditionalPanel(
          condition = "input.measure == 'fitincrement.metric'|input.measure == 'fitincrement.scalar'",
          selectInput("fitincrement.chosen", "Select kind of fit measure",
-                     choices=c("CFI"="cfi", "RMSEA"="rmsea", "SRMR"="srmr"))
+                     choices=c("CFI"="cfi", "RMSEA"="rmsea", "SRMR"="srmr", "NNFI" = "nnfi", 
+                               "GFI" = "gfi", "rmsea.ci.upper" = "rmsea.ci.upper"))
        ),
       hr(),
-      checkboxInput("semTools", "Run global invariance tests for a given subset of groups")
-      
-      #selectInput("rounds", 
-      #             "Choose the ESS round",
-      #             choices=sort(unique(output$vals$dat$essround)),
-      #             selected=1),
-      #radioButtons("weights", "Weight (currently only for covariance)", 
-      #             choiceNames = c("Design weight - takes time!", 
-      #                             "Post-Stratification weight - takes time!",
-      #                             "Don't weight"),
-      #             choiceValues = c("dweight", "pspwght", "noweight"),
-      #             selected = "noweight")
-       
+      checkboxInput("globalMI", "Run global invariance tests for a given subset of groups")
+
     ),
     
    # selectInput("fitindex", "Select for meausure type: fit indices", 
@@ -122,19 +119,25 @@ shinyUI(
        uiOutput("forceFitLink"),
        hr(),
        fluidRow( #tags$style(".well {background-color:#f7ccc;}"),
-         column(6,
-                sliderInput("nclusters",
-                            "Number of clusters:",
-                            min = 1,
-                            max = 10,
-                            value = 2,
-                            step=1, animate = F, round=T, ticks=F)
-       ),
-         column(6,
+       #   column(4,
+       #          sliderInput("nclusters",
+       #                      "Number of clusters:",
+       #                      min = 1,
+       #                      max = 10,
+       #                      value = 2,
+       #                      step=1, animate = F, round=T, ticks=F)
+       # ),
+       
+         column(4,        conditionalPanel(
+           condition = "input.measure == 'fitincrement.metric'|input.measure == 'fitincrement.scalar'",
+           shinyWidgets::materialSwitch(inputId="netSwitch", label = "Use cutoffs?", value = FALSE, 
+                          #onLabel = "Distances", offLabel = "Cutoffs"
+           ))),
+         column(4,
                 uiOutput("excluded")
        )),
        
-       #strong("semTools::measurementInvariance output"),
+       
        uiOutput("verbatimText"),
        
        hr(),
@@ -145,7 +148,7 @@ shinyUI(
     )
   )
   
-    ), tabPanel("",  icon= icon("question-circle", class ="fab"),
+    ), tabPanel("",  icon= icon("question-circle", lib="font-awesome"),
                 fluidRow(column(6,
       includeMarkdown("readme.md")))
       )
