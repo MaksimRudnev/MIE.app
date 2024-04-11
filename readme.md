@@ -1,6 +1,6 @@
 # Demonstration of Measurement invariance explorer Shiny App (now part of the MIE R package)
 
-To install the R package, type in the RStudio console: `devtools::install_github("maksimrudnev/MIE.package", dependencies = TRUE)`.
+To install the R package, type in the RStudio console: `devtools::install_github("maksimrudnev/MIE", dependencies = TRUE)`.
 
 
 Invariance explorer helps to find groups that might demonstrate measurement invariance of latent factors.
